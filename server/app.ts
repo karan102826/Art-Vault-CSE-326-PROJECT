@@ -35,6 +35,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:3000',
   'http://127.0.0.1:5173',
+  'https://art-vault-cse326-project.vercel.app',
   process.env.APP_URL,
   process.env.CLIENT_URL,
 ].filter(Boolean) as string[];

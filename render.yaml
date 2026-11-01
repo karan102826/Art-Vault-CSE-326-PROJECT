@@ -8,7 +8,7 @@ services:
     runtime: node
     plan: free
     region: oregon
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --legacy-peer-deps && npm run build
     startCommand: npm run start
     healthCheckPath: /api/health
     envVars:
@@ -18,6 +18,12 @@ services:
         value: 10000
       - key: JWT_SECRET
         generateValue: true
+      - key: CLIENT_URL
+        value: https://art-vault-cse326-project.vercel.app
+      - key: VITE_SUPABASE_URL
+        value: https://dfspjxweulyiujgsuewr.supabase.co
+      - key: VITE_SUPABASE_ANON_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmc3BqeHdldWx5aXVqZ3N1ZXdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1MjI1MDAsImV4cCI6MjEwOTA5ODUwMH0.ocO0oy2JGeuwERGv-_VWW0-OAImFtsKZpCoPyIgkh5Q
       - key: DATABASE_URL
         fromDatabase:
           name: artvault-postgres
