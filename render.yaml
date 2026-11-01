@@ -1,0 +1,33 @@
+# Render Blueprint Specification for ArtVault PERN Marketplace
+# https://render.com/docs/blueprint-spec
+
+services:
+  # 1. Full-Stack Web Service (Express API + Vite SPA Static Serving)
+  - type: web
+    name: artvault-marketplace
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: artvault-postgres
+          property: connectionString
+
+databases:
+  # 2. Managed PostgreSQL Instance on Render
+  - name: artvault-postgres
+    plan: free
+    region: oregon
+    databaseName: artvault
+    user: artvault_user
+    ipAllowList: [] # Allow all Render services to connect

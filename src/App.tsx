@@ -16,6 +16,7 @@ import { MyLibraryView } from './components/library/MyLibraryView.tsx';
 import { SavedCollectionsView } from './components/library/SavedCollectionsView.tsx';
 import { AdminDashboardView } from './components/admin/AdminDashboardView.tsx';
 import { AuthModal } from './components/common/AuthModal.tsx';
+import { DatabaseStatusModal } from './components/common/DatabaseStatusModal.tsx';
 import { Artwork, Category, Order } from './types/index.ts';
 import { api } from './services/api.ts';
 import { Sparkles, Layers, ShieldCheck, Download, ChevronRight } from 'lucide-react';
@@ -32,6 +33,7 @@ function MarketplaceApp() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isDbModalOpen, setIsDbModalOpen] = useState(false);
 
   // Catalog Data & Filters State
   const [artworks, setArtworks] = useState<Artwork[]>([]);
@@ -268,7 +270,13 @@ function MarketplaceApp() {
           <div className="pt-6 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px]">
             <p>© 2026 ArtVault Marketplace Inc. All rights reserved.</p>
             <div className="flex items-center gap-4 text-neutral-400">
-              <span>PostgreSQL 14+ Certified</span>
+              <button
+                onClick={() => setIsDbModalOpen(true)}
+                className="hover:text-amber-400 text-neutral-300 flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span>PostgreSQL & Environment Status</span>
+              </button>
               <span>·</span>
               <span>Express REST Engine</span>
               <span>·</span>
@@ -318,6 +326,12 @@ function MarketplaceApp() {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
+      />
+
+      {/* 9. Database & Environment Status Modal */}
+      <DatabaseStatusModal
+        isOpen={isDbModalOpen}
+        onClose={() => setIsDbModalOpen(false)}
       />
 
     </div>

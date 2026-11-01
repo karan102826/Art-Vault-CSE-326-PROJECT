@@ -1,5 +1,7 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import pg from 'pg';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 export interface DBUser {
   id: number;
@@ -1032,6 +1034,73 @@ class DatabaseEngine {
       totalDownloads,
     };
   }
+
+  // --- POSTGRESQL POOL INTEGRATION ---
+  public pgPool: pg.Pool | null = null;
+  public isConnectedToPostgres = false;
+  public postgresDetails: { dbName?: string; user?: string } = {};
+
+  public async initPostgresConnection(): Promise<boolean> {
+    const dbUrl = process.env.DATABASE_URL;
+    if (dbUrl && dbUrl.trim().length > 0) {
+      try {
+        const isLocal = dbUrl.includes('localhost') || dbUrl.includes('127.0.0.1');
+        this.pgPool = new pg.Pool({
+          connectionString: dbUrl,
+          ssl: isLocal ? false : { rejectUnauthorized: false },
+          connectionTimeoutMillis: 5000,
+        });
+
+        const res = await this.pgPool.query('SELECT current_database(), current_user');
+        this.isConnectedToPostgres = true;
+        this.postgresDetails = {
+          dbName: res.rows[0].current_database,
+          user: res.rows[0].current_user,
+        };
+        console.log(`✅ [PostgreSQL Connected] Database: ${this.postgresDetails.dbName} as User: ${this.postgresDetails.user}`);
+        return true;
+      } catch (err: any) {
+        this.isConnectedToPostgres = false;
+        console.warn(`⚠️ [PostgreSQL Connect Notice] Remote connection could not be established (${err.message}). Using in-memory engine fallback.`);
+        return false;
+      }
+    }
+    return false;
+  }
+
+  // --- SUPABASE CLIENT INTEGRATION ---
+  public supabaseClient: SupabaseClient | null = null;
+  public isSupabaseConnected = false;
+
+  public async initSupabase(): Promise<boolean> {
+    const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+    const key = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+    if (url && key) {
+      try {
+        this.supabaseClient = createClient(url, key);
+        const { error } = await this.supabaseClient.from('categories').select('id').limit(1);
+        this.isSupabaseConnected = !error;
+        console.log(`✅ [Supabase Client Active] Connected to project: ${url}`);
+        return true;
+      } catch (err: any) {
+        console.warn(`⚠️ [Supabase Client Notice]: ${err.message}`);
+        return false;
+      }
+    }
+    return false;
+  }
+
+  public async query(text: string, params?: any[]) {
+    if (this.pgPool && this.isConnectedToPostgres) {
+      return this.pgPool.query(text, params);
+    }
+    return null;
+  }
 }
 
 export const db = new DatabaseEngine();
+// Automatically initialize Supabase and PostgreSQL connections
+db.initSupabase().catch(() => {});
+db.initPostgresConnection().catch(() => {});
+
+
