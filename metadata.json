@@ -1,0 +1,6 @@
+{
+  "name": "ArtVault - Digital Art Marketplace",
+  "description": "Production-ready digital art marketplace built with the PERN stack featuring curated digital assets, licenses, reviews, and secure instant delivery.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
